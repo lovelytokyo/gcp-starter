@@ -12,7 +12,7 @@ gcloud container clusters create lovelytokyo-server
 
 ## gcloudコマンドで接続
 ```
-gcloud container clusters get-credentials lovelytokyo-server --zone asia-northeast1-a --project cyberagent-018
+gcloud container clusters get-credentials lovelytokyo-server --zone asia-northeast1-a --project lovelytokyo-018
 ```
 
 ## deploy, service作成(LBも自動作成される)
