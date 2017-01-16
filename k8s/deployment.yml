@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: web-server
+  name: batch
 spec:
   replicas: 2
   strategy:
@@ -9,27 +9,13 @@ spec:
   template:
     metadata:
       labels:
-        name: web-server
+        name: batch
         tier: backend
     spec:
       containers:
-      - name: go-server
-        image: gcr.io/cyberagent-018/go-app:v1
+      - name: go-batch
+        image: gcr.io/cyberagent-018/go-batch:v1
         ports:
         - containerPort: 8080
           protocol: TCP
         imagePullPolicy: Always
-      - name: nginx
-        image: gcr.io/cyberagent-018/nginx:v1
-        ports:
-        - containerPort: 80
-          protocol: TCP
-          name: http
-        imagePullPolicy: Always
-        readinessProbe:
-          httpGet:
-            # Path to probe; should be cheap, but representative of typical behavior
-            path: /readiness.html
-            port: 80
-          initialDelaySeconds: 30
-          timeoutSeconds: 1
