@@ -14,13 +14,13 @@ spec:
     spec:
       containers:
       - name: go-server
-        image: techeten/go-server
+        image: gcr.io/cyberagent-018/go-app:v1
         ports:
         - containerPort: 8080
           protocol: TCP
         imagePullPolicy: Always
       - name: nginx
-        image: techeten/nginx
+        image: gcr.io/cyberagent-018/nginx:v1
         ports:
         - containerPort: 80
           protocol: TCP
