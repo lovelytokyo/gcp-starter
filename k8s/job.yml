@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: batch-sample
+spec:
+  template:
+    metadata:
+      name: batch-sample
+    spec:
+      containers:
+      - name: batch-sample
+        image: gcr.io/lovelytokyo-018/go-batch:v1
+        command: ["go", "run", "main.go"]
+      restartPolicy: Never
