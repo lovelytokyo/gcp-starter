@@ -12,6 +12,8 @@ spec:
         name: web-server
         tier: backend
     spec:
+      imagePullSecrets:
+      - name : gcp-registry-key
       containers:
       - name: go-server
         image: gcr.io/cyberagent-018/go-app:v1
