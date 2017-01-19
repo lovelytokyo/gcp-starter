@@ -11,6 +11,6 @@ spec:
       - name : gcp-registry-key
       containers:
       - name: batch-sample
-        image: gcr.io/lovelytokyo-018/go-batch:v1
+        image: gcr.io/lovelytokyo-018/go-batch:v2
         command: ["go", "run", "main.go"]
       restartPolicy: Never

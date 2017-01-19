@@ -37,10 +37,15 @@ batch-sample-ecyx9   0/1       Completed   0          1m
 ```
 
 ```
-kubectl logs batch-sample-ecyx9                                                                                                                                                                                (feature_batch✱)
+kubectl logs batch-sample-ecyx9
 + exec app
 各処理時間合計 18.000365 sec
 実時間 10.000184 sec
+```
+
+## jobを削除する
+```
+kubectl delete job batch-sample
 ```
 
 ## kubectlで直接にjobを実行する
