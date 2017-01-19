@@ -50,7 +50,7 @@ kubectl delete job batch-sample
 
 ## kubectlで直接にjobを実行する
 ```
-kubectl run -it  batch-sample --image=gcr.io/lovelytokyo-018/go-batch:v1 --rm=true go run main.go
+kubectl run -it  batch-sample --image=gcr.io/lovelytokyo-018/go-batch:v2 --rm=true go run main.go
 --
 Waiting for pod default/batch-sample-3619662959-yj4qh to be running, status is Pending, pod ready: false
 If you don't see a command prompt, try pressing enter.
