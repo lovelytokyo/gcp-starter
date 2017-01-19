@@ -3,12 +3,16 @@ kind: Service
 metadata:
   name: web-server
   labels:
-    name: web-server
+    application: web-server
 spec:
   selector:
-    name: web-server
+    application: web-server
   type: LoadBalancer
   ports:
     - port: 80
       name: http
       targetPort: 80
+status:
+  loadBalancer:
+    ingress:
+      - ip: 192.168.99.101
