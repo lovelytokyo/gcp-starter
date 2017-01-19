@@ -2,49 +2,98 @@
 - Google Cloud SDKインストール済み
 - kubectl Componentインストール済み
 - gcloud configセットアップ済み
+- minikubeインストール済み
 
-# kubernetesを使ってnginx+go構成のpodとserviceを作る
+# ingress検証
 
-## クラスタを作る
-```
-gcloud container clusters create lovelytokyo-server
-```
+## minikube でingress アドオンを有効にする
 
-## gcloudコマンドで接続
 ```
-gcloud container clusters get-credentials lovelytokyo-server --zone asia-northeast1-a --project lovelytokyo-018
-```
-
-## deploy, service作成(LBも自動作成される)
-```
-kubectl apply -f k8s/deployment.yml
-kubectl apply -f k8s/service.yml
+$ minikube addons list
+- addon-manager: enabled
+- dashboard: enabled
+- kube-dns: enabled
+- heapster: disabled
+- ingress: disabled
+- awsecr-creds: disabled
 ```
 
-## service作成結果確認
+addonを有効にする
+
 ```
-kubectl describe services web-server
-Name:			web-server
+$ minikube addons enable ingress
+```
+
+## 検証内容
+
+minikubeでingress(443)⇨replicaset(80)⇨pods(80)
+ブラウザでhttps://ingressのアドレスが動作するか
+
+サービスを作る
+
+```
+kubectl create -f k8s/service.yml
+```
+
+replicastを作る
+
+```
+kubectl create -f k8s/rs.yml
+```
+
+ingressを作る
+
+```
+kubectl create -f k8s/ingress.yml
+```
+
+
+ingressの詳細を見る
+
+```
+$ kubectl describe ing simplelb
+Name:			simplelb
 Namespace:		default
-Labels:			name=web-server
-Selector:		name=web-server
-Type:			LoadBalancer
-IP:			10.215.251.53
-LoadBalancer Ingress:	104.198.112.212
-Port:			http	80/TCP
-NodePort:		http	31909/TCP
-Endpoints:		10.212.1.4:80,10.212.2.5:80
-Session Affinity:	None
+Address:		192.168.99.101
+Default backend:	web-server:80 (172.17.0.4:80,172.17.0.5:80)
+Rules:
+  Host	Path	Backends
+  ----	----	--------
+  *	* 	web-server:80 (172.17.0.4:80,172.17.0.5:80)
+Annotations:
 Events:
-  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason			Message
-  ---------	--------	-----	----			-------------	--------	------			-------
-  1m		1m		1	{service-controller }			Normal		CreatingLoadBalancer	Creating load balancer
-  39s		39s		1	{service-controller }			Normal		CreatedLoadBalancer	Created load balancer
+  FirstSeen	LastSeen	Count	From				SubObjectPath	Type		Reason	Message
+  ---------	--------	-----	----				-------------	--------	------	-------
+  13m		13m		1	{nginx-ingress-controller }			Normal		CREATE	default/simplelb
+  13m		13m		1	{nginx-ingress-controller }			Normal		CREATE	ip: 192.168.99.101
+  13m		13m		1	{nginx-ingress-controller }			Normal		UPDATE	default/simplelb
 ```
 
-## 外部からアクセス可能か確認
-- 10.215.251.53にアクセスすると「Hello World by Go!」が表示される
+Addressに出ているIPへブラウザからアクセスしてみる
 
-## 参考サイト
-http://qiita.com/techeten/items/ebb0833d50c882398b0f
+```
+default backend - 404
+```
+ごなる
 
+minikube sshし、ifconfigしてみると
+
+```
+eth1      Link encap:Ethernet  HWaddr 08:00:27:D7:9F:C4
+          inet addr:192.168.99.101  Bcast:192.168.99.255  Mask:255.255.255.0
+          inet6 addr: fe80::a00:27ff:fed7:9fc4/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:11842 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:8518 errors:0 dropped:0 overruns:0 carrier:0
+          collisions:0 txqueuelen:1000
+          RX bytes:1604998 (1.5 MiB)  TX bytes:5838792 (5.5 MiB)
+```
+
+defaultbackendコンテナーへへルーティングされてしまう
+```
+2272052282ef        gcr.io/google_containers/defaultbackend:1.0                  "/server"                18 hours ago        Up 18 hours                                                                              k8s_default-http-backend.54c2c7bd_default-http-backend-50f8j_kube-system_1d2a4476-dd52-11e6-b480-080027e92c9f_db67437e
+```
+
+minikubeのnode自分自身の80ポートにアクセスしたとみなされる模様。。
+ingress自体のIPを変える方法が分からない、、
+一旦ingressない方向で他の構成を検討する
